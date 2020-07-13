@@ -57,7 +57,14 @@ public class DefaultPayIdDiscoveryClient implements PayIdDiscoveryClient {
   }
 
   @Override
-  public Optional<HttpUrl> getEasyCheckoutUrl(PayId payId, UnsignedLong amount, PayId receiverPayId, HttpUrl nextUrl) {
+  public Optional<HttpUrl> getEasyCheckoutUrl(
+    PayId payId,
+    UnsignedLong amount,
+    PayId receiverPayId,
+    String currency,
+    String network,
+    HttpUrl nextUrl
+  ) {
     return this.discoverPayId(payId)
       .flatMap(jrd ->
         jrd.links().stream()
@@ -67,6 +74,8 @@ public class DefaultPayIdDiscoveryClient implements PayIdDiscoveryClient {
             Map<String, String> templateParamMap = new HashMap();
             templateParamMap.put(JrdLinkConstants.AMOUNT, amount.toString());
             templateParamMap.put(JrdLinkConstants.RECEIVER_PAY_ID, receiverPayId.toString());
+            templateParamMap.put(JrdLinkConstants.CURRENCY, currency);
+            templateParamMap.put(JrdLinkConstants.NETWORK, network);
             templateParamMap.put(JrdLinkConstants.NEXT_URL, nextUrl.toString());
             return link.href().orElse(resolveUrlTemplate(link.template().get(), templateParamMap));
           })

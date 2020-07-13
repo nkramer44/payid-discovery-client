@@ -10,6 +10,8 @@ public class JrdLinkConstants {
   public static final String ACCT_PART = "acctPart";
   public static final String RECEIVER_PAY_ID = "receiverPayId";
   public static final String AMOUNT = "amount";
+  public static final String CURRENCY = "currency";
+  public static final String NETWORK = "network";
   public static final String NEXT_URL = "nextUrl";
 
 }

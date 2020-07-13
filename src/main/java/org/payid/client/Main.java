@@ -18,6 +18,6 @@ public class Main {
       .account("")
       .build();
 
-    payIdDiscoveryClient.getEasyCheckoutUrl(payId, UnsignedLong.ONE, receiverPayId, HttpUrl.get("https://example.com/redirecturl"));
+//    payIdDiscoveryClient.getEasyCheckoutUrl(payId, UnsignedLong.ONE, receiverPayId, HttpUrl.get("https://example.com/redirecturl"));
   }
 }
