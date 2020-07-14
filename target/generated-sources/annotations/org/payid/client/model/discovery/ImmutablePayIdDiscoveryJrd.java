@@ -8,6 +8,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Var;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import javax.annotation.CheckReturnValue;
@@ -16,6 +17,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import javax.annotation.concurrent.Immutable;
 import javax.annotation.concurrent.NotThreadSafe;
 import org.immutables.value.Generated;
+import org.payid.client.model.payid.PayId;
 
 /**
  * Immutable implementation of {@link PayIdDiscoveryJrd}.
@@ -30,10 +32,23 @@ import org.immutables.value.Generated;
 @Immutable
 @CheckReturnValue
 public final class ImmutablePayIdDiscoveryJrd implements PayIdDiscoveryJrd {
+  private final PayId subject;
   private final ImmutableList<PayIdDiscoveryLink> links;
 
-  private ImmutablePayIdDiscoveryJrd(ImmutableList<PayIdDiscoveryLink> links) {
+  private ImmutablePayIdDiscoveryJrd(
+      PayId subject,
+      ImmutableList<PayIdDiscoveryLink> links) {
+    this.subject = subject;
     this.links = links;
+  }
+
+  /**
+   * @return The value of the {@code subject} attribute
+   */
+  @JsonProperty("subject")
+  @Override
+  public PayId subject() {
+    return subject;
   }
 
   /**
@@ -46,13 +61,25 @@ public final class ImmutablePayIdDiscoveryJrd implements PayIdDiscoveryJrd {
   }
 
   /**
+   * Copy the current immutable object by setting a value for the {@link PayIdDiscoveryJrd#subject() subject} attribute.
+   * A shallow reference equality check is used to prevent copying of the same value by returning {@code this}.
+   * @param value A new value for subject
+   * @return A modified copy of the {@code this} object
+   */
+  public final ImmutablePayIdDiscoveryJrd withSubject(PayId value) {
+    if (this.subject == value) return this;
+    PayId newValue = Objects.requireNonNull(value, "subject");
+    return new ImmutablePayIdDiscoveryJrd(newValue, this.links);
+  }
+
+  /**
    * Copy the current immutable object with elements that replace the content of {@link PayIdDiscoveryJrd#links() links}.
    * @param elements The elements to set
    * @return A modified copy of {@code this} object
    */
   public final ImmutablePayIdDiscoveryJrd withLinks(PayIdDiscoveryLink... elements) {
     ImmutableList<PayIdDiscoveryLink> newValue = ImmutableList.copyOf(elements);
-    return new ImmutablePayIdDiscoveryJrd(newValue);
+    return new ImmutablePayIdDiscoveryJrd(this.subject, newValue);
   }
 
   /**
@@ -64,7 +91,7 @@ public final class ImmutablePayIdDiscoveryJrd implements PayIdDiscoveryJrd {
   public final ImmutablePayIdDiscoveryJrd withLinks(Iterable<? extends PayIdDiscoveryLink> elements) {
     if (this.links == elements) return this;
     ImmutableList<PayIdDiscoveryLink> newValue = ImmutableList.copyOf(elements);
-    return new ImmutablePayIdDiscoveryJrd(newValue);
+    return new ImmutablePayIdDiscoveryJrd(this.subject, newValue);
   }
 
   /**
@@ -79,16 +106,18 @@ public final class ImmutablePayIdDiscoveryJrd implements PayIdDiscoveryJrd {
   }
 
   private boolean equalTo(ImmutablePayIdDiscoveryJrd another) {
-    return links.equals(another.links);
+    return subject.equals(another.subject)
+        && links.equals(another.links);
   }
 
   /**
-   * Computes a hash code from attributes: {@code links}.
+   * Computes a hash code from attributes: {@code subject}, {@code links}.
    * @return hashCode value
    */
   @Override
   public int hashCode() {
     @Var int h = 5381;
+    h += (h << 5) + subject.hashCode();
     h += (h << 5) + links.hashCode();
     return h;
   }
@@ -101,6 +130,7 @@ public final class ImmutablePayIdDiscoveryJrd implements PayIdDiscoveryJrd {
   public String toString() {
     return MoreObjects.toStringHelper("PayIdDiscoveryJrd")
         .omitNullValues()
+        .add("subject", subject)
         .add("links", links)
         .toString();
   }
@@ -115,11 +145,18 @@ public final class ImmutablePayIdDiscoveryJrd implements PayIdDiscoveryJrd {
   @JsonDeserialize
   @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE)
   static final class Json implements PayIdDiscoveryJrd {
+    @Nullable PayId subject;
     @Nullable List<PayIdDiscoveryLink> links = ImmutableList.of();
+    @JsonProperty("subject")
+    public void setSubject(PayId subject) {
+      this.subject = subject;
+    }
     @JsonProperty("links")
     public void setLinks(List<PayIdDiscoveryLink> links) {
       this.links = links;
     }
+    @Override
+    public PayId subject() { throw new UnsupportedOperationException(); }
     @Override
     public List<PayIdDiscoveryLink> links() { throw new UnsupportedOperationException(); }
   }
@@ -133,6 +170,9 @@ public final class ImmutablePayIdDiscoveryJrd implements PayIdDiscoveryJrd {
   @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
   static ImmutablePayIdDiscoveryJrd fromJson(Json json) {
     ImmutablePayIdDiscoveryJrd.Builder builder = ImmutablePayIdDiscoveryJrd.builder();
+    if (json.subject != null) {
+      builder.subject(json.subject);
+    }
     if (json.links != null) {
       builder.addAllLinks(json.links);
     }
@@ -159,6 +199,7 @@ public final class ImmutablePayIdDiscoveryJrd implements PayIdDiscoveryJrd {
    * Creates a builder for {@link ImmutablePayIdDiscoveryJrd ImmutablePayIdDiscoveryJrd}.
    * <pre>
    * ImmutablePayIdDiscoveryJrd.builder()
+   *    .subject(org.payid.client.model.payid.PayId) // required {@link PayIdDiscoveryJrd#subject() subject}
    *    .addLinks|addAllLinks(org.payid.client.model.discovery.PayIdDiscoveryLink) // {@link PayIdDiscoveryJrd#links() links} elements
    *    .build();
    * </pre>
@@ -178,6 +219,10 @@ public final class ImmutablePayIdDiscoveryJrd implements PayIdDiscoveryJrd {
   @Generated(from = "PayIdDiscoveryJrd", generator = "Immutables")
   @NotThreadSafe
   public static final class Builder {
+    private static final long INIT_BIT_SUBJECT = 0x1L;
+    private long initBits = 0x1L;
+
+    private @Nullable PayId subject;
     private ImmutableList.Builder<PayIdDiscoveryLink> links = ImmutableList.builder();
 
     private Builder() {
@@ -194,7 +239,21 @@ public final class ImmutablePayIdDiscoveryJrd implements PayIdDiscoveryJrd {
     @CanIgnoreReturnValue 
     public final Builder from(PayIdDiscoveryJrd instance) {
       Objects.requireNonNull(instance, "instance");
+      subject(instance.subject());
       addAllLinks(instance.links());
+      return this;
+    }
+
+    /**
+     * Initializes the value for the {@link PayIdDiscoveryJrd#subject() subject} attribute.
+     * @param subject The value for subject 
+     * @return {@code this} builder for use in a chained invocation
+     */
+    @CanIgnoreReturnValue 
+    @JsonProperty("subject")
+    public final Builder subject(PayId subject) {
+      this.subject = Objects.requireNonNull(subject, "subject");
+      initBits &= ~INIT_BIT_SUBJECT;
       return this;
     }
 
@@ -250,7 +309,16 @@ public final class ImmutablePayIdDiscoveryJrd implements PayIdDiscoveryJrd {
      * @throws java.lang.IllegalStateException if any required attributes are missing
      */
     public ImmutablePayIdDiscoveryJrd build() {
-      return new ImmutablePayIdDiscoveryJrd(links.build());
+      if (initBits != 0) {
+        throw new IllegalStateException(formatRequiredAttributesMessage());
+      }
+      return new ImmutablePayIdDiscoveryJrd(subject, links.build());
+    }
+
+    private String formatRequiredAttributesMessage() {
+      List<String> attributes = new ArrayList<>();
+      if ((initBits & INIT_BIT_SUBJECT) != 0) attributes.add("subject");
+      return "Cannot build PayIdDiscoveryJrd, some of required attributes are not set " + attributes;
     }
   }
 }

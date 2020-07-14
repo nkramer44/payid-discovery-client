@@ -49,7 +49,7 @@ public class DefaultPayIdDiscoveryClient implements PayIdDiscoveryClient {
           .map(link -> {
             Map<String, String> templateParamMap = new HashMap();
             templateParamMap.put(JrdLinkConstants.ACCT_PART, payId.account());
-            return link.href().orElse(resolveUrlTemplate(link.template().get(), templateParamMap));
+            return link.href().orElseGet(() -> resolveUrlTemplate(link.template().get(), templateParamMap));
           })
           .orElse(payId.baseUrl())
       )
@@ -77,16 +77,16 @@ public class DefaultPayIdDiscoveryClient implements PayIdDiscoveryClient {
             templateParamMap.put(JrdLinkConstants.CURRENCY, currency);
             templateParamMap.put(JrdLinkConstants.NETWORK, network);
             templateParamMap.put(JrdLinkConstants.NEXT_URL, nextUrl.toString());
-            return link.href().orElse(resolveUrlTemplate(link.template().get(), templateParamMap));
+            return link.href().orElseGet(() -> resolveUrlTemplate(link.template().get(), templateParamMap));
           })
       );
   }
 
   private HttpUrl resolveUrlTemplate(String template, Map<String, String> templateParamMap) {
-    String resolvedTemplate = template;
     for (String paramName : templateParamMap.keySet()) {
-      resolvedTemplate =  template.replace("{" + paramName + "}", templateParamMap.get(paramName));
+      template = template.replace("{" + paramName + "}", templateParamMap.get(paramName));
+
     }
-    return HttpUrl.get(resolvedTemplate);
+    return HttpUrl.get(template);
   }
 }
