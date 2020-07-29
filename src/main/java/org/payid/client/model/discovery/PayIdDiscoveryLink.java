@@ -8,6 +8,8 @@ import org.immutables.value.Value;
 
 import java.util.Optional;
 
+@JsonSerialize(as = ImmutablePayIdDiscoveryLink.class)
+@JsonDeserialize(as = ImmutablePayIdDiscoveryLink.class)
 public interface PayIdDiscoveryLink {
 
   static ImmutablePayIdDiscoveryLink.Builder builder() {
@@ -21,8 +23,6 @@ public interface PayIdDiscoveryLink {
   Optional<String> template();
 
   @Value.Immutable
-  @JsonSerialize(as = ImmutablePayIdDiscoveryLink.class)
-  @JsonDeserialize(as = ImmutablePayIdDiscoveryLink.class)
   abstract class AbstractPayIdDiscoveryLink implements PayIdDiscoveryLink {
 
     @Value.Check

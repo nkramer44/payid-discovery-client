@@ -18,7 +18,7 @@ public class DefaultPayIdDiscoveryClient implements PayIdDiscoveryClient {
 
   public DefaultPayIdDiscoveryClient() {
     this.payIdDiscoveryNetworkClient = FeignPayIdDiscoveryNetworkClient.construct(
-      ObjectMapperFactory.createObjectMapperForProblemsJson()
+      ObjectMapperFactory.create()
     );
   }
 
