@@ -40,19 +40,20 @@ public interface PayIdDiscoveryClient {
    * that template with the given parameters, yielding a PayID Easy Checkout URL.
    *
    * @param payId The {@link PayId} which PayID Easy Checkout Discovery should be performed on.
-   * @param amount The amount that should be sent.
+   * @param amount  The amount that should be sent by the payer to the recipient
    * @param receiverPayId The {@link PayId} of the receiver of the PayID Easy Checkout payment.
-   * @param currency The currency that the Easy Checkout payment must be paid in.
-   * @param network The network that the Easy Checkout payment must be paid over.
-   * @param nextUrl The {@link HttpUrl} that should be used after an Easy Checkout payment has been sent.
+   * @param assetCode The currency code that denominates the amount.
+   * @param assetScale Defines how many units make up one regular unit of the assetCode.
+   * @param nextUrl An {@link HttpUrl} that the payer's wallet can navigate a payer to after the payer completes a payment.
    * @return An {@link HttpUrl} if the PayID Server supports PayID Easy Checkout.
    */
   Optional<HttpUrl> getEasyCheckoutUrl(
     PayId payId,
     UnsignedLong amount,
     PayId receiverPayId,
-    String currency,
-    String network,
+    String assetCode,
+    short assetScale,
+    String paymentNetwork,
     HttpUrl nextUrl
   );
 

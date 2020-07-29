@@ -7,6 +7,7 @@ import org.payid.client.jackson.ObjectMapperFactory;
 import org.payid.client.model.discovery.JrdLinkConstants;
 import org.payid.client.model.discovery.PayIdDiscoveryJrd;
 import org.payid.client.model.payid.PayId;
+import org.payid.client.model.problems.InvalidJrdLinkProblem;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -61,8 +62,9 @@ public class DefaultPayIdDiscoveryClient implements PayIdDiscoveryClient {
     PayId payId,
     UnsignedLong amount,
     PayId receiverPayId,
-    String currency,
-    String network,
+    String assetCode,
+    short assetScale,
+    String paymentNetwork,
     HttpUrl nextUrl
   ) {
     return this.discoverPayId(payId)
@@ -71,15 +73,24 @@ public class DefaultPayIdDiscoveryClient implements PayIdDiscoveryClient {
           .filter(link -> link.rel().equals(JrdLinkConstants.EASY_CHECKOUT_REL))
           .findFirst()
           .map(link -> {
-            Map<String, String> templateParamMap = new HashMap();
-            templateParamMap.put(JrdLinkConstants.AMOUNT, amount.toString());
-            templateParamMap.put(JrdLinkConstants.RECEIVER_PAY_ID, receiverPayId.toString());
-            templateParamMap.put(JrdLinkConstants.CURRENCY, currency);
-            templateParamMap.put(JrdLinkConstants.NETWORK, network);
-            templateParamMap.put(JrdLinkConstants.NEXT_URL, nextUrl.toString());
-            return link.href().orElseGet(() -> resolveUrlTemplate(link.template().get(), templateParamMap));
+            Map<String, String> queryParamMap = new HashMap();
+            queryParamMap.put(JrdLinkConstants.AMOUNT, amount.toString());
+            queryParamMap.put(JrdLinkConstants.RECEIVER_PAY_ID, receiverPayId.toString());
+            queryParamMap.put(JrdLinkConstants.ASSET_CODE, assetCode);
+            queryParamMap.put(JrdLinkConstants.ASSET_SCALE, String.valueOf(assetScale));
+            queryParamMap.put(JrdLinkConstants.PAYMENT_NETWORK, paymentNetwork);
+            queryParamMap.put(JrdLinkConstants.NEXT_URL, nextUrl.toString());
+            return link.href()
+              .map(href -> assembleEasyCheckoutUrl(href, queryParamMap))
+              .orElseThrow(() -> new InvalidJrdLinkProblem("Easy Checkout Links must have an `href` field", link));
           })
       );
+  }
+
+  private HttpUrl assembleEasyCheckoutUrl(HttpUrl href, Map<String, String> queryParamMap) {
+    HttpUrl.Builder builder = href.newBuilder();
+    queryParamMap.forEach(builder::addQueryParameter);
+    return builder.build();
   }
 
   private HttpUrl resolveUrlTemplate(String template, Map<String, String> templateParamMap) {

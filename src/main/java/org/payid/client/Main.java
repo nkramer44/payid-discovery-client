@@ -20,7 +20,15 @@ public class Main {
       .account("nkramer44")
       .build();
 
-    Optional<HttpUrl> easyCheckoutUrl = payIdDiscoveryClient.getEasyCheckoutUrl(payId, UnsignedLong.ONE, receiverPayId, "XRP", "XRPL", HttpUrl.get("https://example.com/redirecturl"));
+    Optional<HttpUrl> easyCheckoutUrl = payIdDiscoveryClient.getEasyCheckoutUrl(
+      payId,
+      UnsignedLong.ONE,
+      receiverPayId,
+      "XRP",
+      (short) 6,
+      "XRPL",
+      HttpUrl.get("https://example.com/redirecturl")
+    );
     easyCheckoutUrl.ifPresent(System.out::println);
   }
 }

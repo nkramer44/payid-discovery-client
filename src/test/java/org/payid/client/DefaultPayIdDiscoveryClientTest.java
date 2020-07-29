@@ -26,7 +26,6 @@ public class DefaultPayIdDiscoveryClientTest {
   private PayIdDiscoveryNetworkClient mockPayIdDiscoveryNetworkClient;
   private PayIdDiscoveryJrd mockJrd;
   private HttpUrl payIdUrl;
-  private String easyCheckoutTemplate;
   private HttpUrl easyCheckoutUrl;
 
   @Before
@@ -39,7 +38,7 @@ public class DefaultPayIdDiscoveryClientTest {
       .account("alice")
       .build();
     payIdUrl = HttpUrl.get("https://payid.example.com/alice");
-    easyCheckoutTemplate = "https://wallet.example.com/wallet?amount={amount}&receiverPayId={receiverPayId}&currency={currency}&network={network}&nextUrl={nextUrl}";
+    easyCheckoutUrl = HttpUrl.get("https://wallet.example.com/wallet");
 
     mockJrd = PayIdDiscoveryJrd.builder()
       .subject(examplePayId)
@@ -50,7 +49,7 @@ public class DefaultPayIdDiscoveryClientTest {
           .build(),
         PayIdDiscoveryLink.builder()
           .rel(JrdLinkConstants.EASY_CHECKOUT_REL)
-          .template(easyCheckoutTemplate)
+          .href(easyCheckoutUrl)
           .build())
       .build();
   }
@@ -78,25 +77,38 @@ public class DefaultPayIdDiscoveryClientTest {
 
     UnsignedLong amount = UnsignedLong.ONE;
     PayId receiverPayId = PayId.of("pay$merchant.com");
-    String currency = "XRP";
-    String network = "XRPL";
+    String assetCode = "XRP";
+    short assetScale = 6;
+    String paymentNetwork = "XRPL";
     HttpUrl nextUrl = HttpUrl.get("https://merchant.com/thank-you");
-    easyCheckoutUrl = HttpUrl.get(String.format("https://wallet.example.com/wallet?amount=%s&receiverPayId=%s&currency=%s&network=%s&nextUrl=%s",
-      amount,
-      receiverPayId,
-      currency,
-      network,
-      nextUrl
-    ));
+    HttpUrl expectedAssembledEasyCheckoutUrl = easyCheckoutUrl.newBuilder()
+      .addQueryParameter("amount", amount.toString())
+      .addQueryParameter("receiverPayId", receiverPayId.toString())
+      .addQueryParameter("assetCode", assetCode)
+      .addQueryParameter("assetScale", String.valueOf(assetScale))
+      .addQueryParameter("paymentNetwork", paymentNetwork)
+      .addQueryParameter("nextUrl", nextUrl.toString())
+      .build();
+
     Optional<HttpUrl> url = payIdDiscoveryClient.getEasyCheckoutUrl(
       examplePayId,
       amount,
       receiverPayId,
-      currency,
-      network,
+      assetCode,
+      assetScale,
+      paymentNetwork,
       nextUrl
     );
 
-    assertThat(url).isNotEmpty().get().isEqualTo(easyCheckoutUrl);
+    assertThat(url).isNotEmpty();
+    assertThat(url.get().scheme()).isEqualTo(expectedAssembledEasyCheckoutUrl.scheme());
+    assertThat(url.get().host()).isEqualTo(expectedAssembledEasyCheckoutUrl.host());
+    assertThat(url.get().pathSegments()).isEqualTo(expectedAssembledEasyCheckoutUrl.pathSegments());
+    assertThat(url.get().queryParameter("amount")).isEqualTo(expectedAssembledEasyCheckoutUrl.queryParameter("amount"));
+    assertThat(url.get().queryParameter("receiverPayId")).isEqualTo(expectedAssembledEasyCheckoutUrl.queryParameter("receiverPayId"));
+    assertThat(url.get().queryParameter("assetCode")).isEqualTo(expectedAssembledEasyCheckoutUrl.queryParameter("assetCode"));
+    assertThat(url.get().queryParameter("assetScale")).isEqualTo(expectedAssembledEasyCheckoutUrl.queryParameter("assetScale"));
+    assertThat(url.get().queryParameter("paymentNetwork")).isEqualTo(expectedAssembledEasyCheckoutUrl.queryParameter("paymentNetwork"));
+    assertThat(url.get().queryParameter("nextUrl")).isEqualTo(expectedAssembledEasyCheckoutUrl.queryParameter("nextUrl"));
   }
 }
